@@ -1,0 +1,12 @@
+version: "3.3"
+
+services:
+  share:
+    build:
+      context: ./share
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./share:/usr/src/app
