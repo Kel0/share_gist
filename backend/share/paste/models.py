@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import uuid
-from traceback import format_exc
 from datetime import datetime, timedelta
+from traceback import format_exc
 from typing import List, Optional
 
 from django.db import models
@@ -46,7 +46,7 @@ class Paste(models.Model):
                     lex_id=lex_id,
                     content=content,
                     inspiration_date=datetime.now() + timedelta(days=7),
-                    uuid=str(uuid.uuid1())
+                    uuid=str(uuid.uuid1()),
                 )
                 return paste
 
@@ -54,10 +54,10 @@ class Paste(models.Model):
                 lex_id=lex_id,
                 content=content,
                 uuid=str(uuid.uuid1()),
-                inspiration_date=inspiration_date
+                inspiration_date=inspiration_date,
             )
             return paste
 
-        except Exception as e_info:
+        except Exception:
             print(format_exc())
             return None

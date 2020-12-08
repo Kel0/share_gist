@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('paste', '0002_auto_20201207_1224'),
+        ("paste", "0002_auto_20201207_1224"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='paste',
-            name='inspiration_date',
+            model_name="paste",
+            name="inspiration_date",
             field=models.DateField(),
         ),
         migrations.AlterField(
-            model_name='paste',
-            name='uuid',
+            model_name="paste",
+            name="uuid",
             field=models.CharField(max_length=255),
         ),
     ]

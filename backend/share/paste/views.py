@@ -43,12 +43,23 @@ def token_verify(func):
 
 
 class LexersView(APIView):
+    """
+    get:
+    Return a list of all lexers.
+
+    post:
+    Create a new lexer instance.
+    """
+
     def __init__(self):
         super().__init__()
         self.lexer_model = Lexer()
 
     @token_verify
     def get(self, request):
+        """
+        GET METHOD
+        """
         lexers = serializers.serialize("json", self.lexer_model.get_lexers_as_list())
         return JsonResponse({"status": HTTPStatus.OK, "detail": json.loads(lexers)})
 
