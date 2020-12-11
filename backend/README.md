@@ -155,6 +155,7 @@ Parameters
 
 | Parameter | Type | Description |
 | :--- | :--- | :--- |
+| `type` | `string` | **Required**. Type of request("edit" or "create") |
 | `lexer_id` | `integer` | **Required**. Unique id of lexer |
 | `code` | `string` | **Required**. Code for paste |
 | `inspiration_date` | `integer` | **Optional**. Inspiration date of paste |
@@ -164,7 +165,7 @@ Success response example
 
 ```json
 {
-  "status": 200,
+  "status": 201,
   "details": {
     "id": 17,
     "lexer": {
@@ -174,6 +175,42 @@ Success response example
     "name": "Text snippet",
     "uuid": "b3edd3b2-396b-11eb-be0a-a8a15909c179",
     "content": "<div class=\"highlight\"><pre><span></span><a name=\"True-1\"></a><span class=\"err\">print(&#39;HELLO,</span> <span class=\"err\">WORLD!&#39;)</span>\n</pre></div>\n",
+    "inspiration_date": "2020-12-15"
+  }
+}
+```
+
+
+#### Edit paste
+
+```http
+POST /api/v1/snippet/?api_token=...
+```
+
+Parameters
+
+| Parameter | Type | Description |
+| :--- | :--- | :--- |
+| `type` | `string` | **Required**. Type of request("edit" or "create") |
+| `uuid` | `string` | **Required**. Unique id of snippet |
+| `name` | `string` | **Optional**. Provide this parameter if you want to change name of snippet. |
+| `content` | `string` | **Optional**. Provide this parameter if you want to change code of snippet. |
+
+
+Success response example
+
+```json
+{
+  "status": 201,
+  "details": {
+    "id": 17,
+    "lexer": {
+      "id": 1,
+      "name": "json"
+    },
+    "name": "Text snippet",
+    "uuid": "b3edd3b2-396b-11eb-be0a-a8a15909c179",
+    "content": "<div class=\"highlight\"><pre><span></span><a name=\"True-1\"></a><span class=\"err\">print(&#39;HELLO.</span> <span class=\"err\">WORLD!&#39;)</span>\n</pre></div>\n",
     "inspiration_date": "2020-12-15"
   }
 }
