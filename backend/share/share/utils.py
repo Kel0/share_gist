@@ -6,12 +6,6 @@ from django.conf import settings
 from django.http import JsonResponse
 
 
-@dataclass(frozen=True)
-class PostTypes:
-    CREATE: str = "create"
-    EDIT: str = "edit"
-
-
 @dataclass
 class ApiResponse:
     status: int

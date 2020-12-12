@@ -3,12 +3,10 @@ from datetime import datetime
 from http import HTTPStatus
 
 from django.forms.models import model_to_dict
-from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
-from pygments.lexers import get_lexer_by_name
 from rest_framework.views import APIView
 
-from share.utils import ApiResponse, token_verify, PostTypes  # noqa
+from share.utils import ApiResponse, token_verify  # noqa
 
 from .models import Lexer, Paste
 from .serializers import LexerSerializer, PasteSerializer
@@ -60,11 +58,11 @@ class PastesView(APIView):
 
         if len(paste) == 0:
             return ApiResponse(
-                status=HTTPStatus.OK,
-                details={},
+                status=HTTPStatus.NOT_FOUND,
+                details="Paste not found.",
             ).json
 
-        serializer = PasteSerializer(paste[0])  # Тут все работает.
+        serializer = PasteSerializer(paste[0])
         paste = convert_code_to_html(serializer, self.formatter)
 
         return ApiResponse(
@@ -75,51 +73,72 @@ class PastesView(APIView):
     @token_verify
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
+        lexer_id = data["lexer_id"]
+        name = data["name"]
+        content = data["code"]
+        unix = data.get("inspiration_date")
+        inspiration_date = 0 if not unix else datetime.fromtimestamp(int(unix))
 
-        if data["type"] == PostTypes.CREATE:
-            lexer_id = data["lexer_id"]
-            name = data["name"]
-            content = data["code"]
-            unix = data.get("inspiration_date")
-            inspiration_date = 0 if not unix else datetime.fromtimestamp(int(unix))
+        paste = self.paste_model.create_paste(
+            lex_id=lexer_id,
+            name=name,
+            content=content,
+            inspiration_date=inspiration_date,
+        )
+        if paste:
+            _paste = model_to_dict(paste)
+            _paste["lex"] = model_to_dict(paste.lex)
 
-            paste = self.paste_model.create_paste(
-                lex_id=lexer_id,
-                name=name,
-                content=content,
-                inspiration_date=inspiration_date,
-            )
-            if paste:
-                _paste = model_to_dict(paste)
-                _paste["lex"] = model_to_dict(paste.lex)
+            return ApiResponse(status=HTTPStatus.CREATED, details=_paste).json
 
-                return ApiResponse(status=HTTPStatus.CREATED, details=_paste).json
+        return ApiResponse(
+            status=HTTPStatus.BAD_REQUEST, details="Something went wrong."
+        ).json
 
+    @token_verify
+    def put(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        uuid = data["uuid"]
+        name = data.get("name")
+        content = data.get("content")
+
+        paste = self.paste_model.get_paste_by_uuid_as_list(unique_id=uuid)
+
+        if len(paste) == 0:
             return ApiResponse(
-                status=HTTPStatus.BAD_REQUEST, details="Something went wrong."
+                status=HTTPStatus.NOT_FOUND,
+                details="No paste under {uuid}".format(uuid=uuid),
+            ).json
+        _paste = paste[0]
+
+        if name:
+            _paste.name = name
+        if content:
+            _paste.content = content
+
+        _paste.save()
+        serializer = PasteSerializer(_paste)
+        return_paste = convert_code_to_html(serializer, self.formatter)
+
+        return ApiResponse(status=HTTPStatus.OK, details=return_paste).json
+
+    @token_verify
+    def delete(self, response):
+        data = json.loads(response.body.decode("utf-8"))
+        uuid = data.get("uuid")
+
+        if not uuid:
+            return ApiResponse(
+                status=HTTPStatus.BAD_REQUEST, details="There is no uuid parameter."
             ).json
 
-        elif data["type"] == PostTypes.EDIT:
-            uuid = data["uuid"]
-            name = data.get("name")
-            content = data.get("content")
+        paste = self.paste_model.get_object(unique_id=uuid)
 
-            paste = self.paste_model.get_paste_by_uuid_as_list(unique_id=uuid)
+        if paste is None:
+            return ApiResponse(
+                status=HTTPStatus.NOT_FOUND,
+                details="There is no paste under {uuid}.".format(uuid=uuid),
+            ).json
 
-            if len(paste) == 0:
-                return ApiResponse(
-                    status=HTTPStatus.NO_CONTENT,
-                    details="No paste under {uuid}".format(uuid=uuid)
-                ).json
-            _paste = paste[0]
-
-            if name:
-                _paste.name = name
-            if content:
-                _paste.content = content
-
-            _paste.save()
-            serializer = PasteSerializer(_paste)
-            return_paste = convert_code_to_html(serializer, self.formatter)
-
-            return ApiResponse(status=HTTPStatus.CREATED, details=return_paste).json
+        paste.delete()
+        return ApiResponse(status=HTTPStatus.OK, details=True).json
