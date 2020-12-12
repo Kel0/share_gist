@@ -31,7 +31,7 @@ API_TOKEN_HASHED = md5(API_TOKEN.encode("utf-8")).hexdigest()
 SECRET_KEY = "5+!5nprd_fv61i*7x$eh2wohen+8d*^$g()l(at#e$^su8=oe8"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config("DEBUG", default=False, cast=bool)
+DEBUG = config("DEBUG", default=True, cast=bool)
 
 ALLOWED_HOSTS = ["*"]
 

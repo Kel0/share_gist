@@ -34,6 +34,11 @@ class Paste(models.Model):
     inspiration_date = models.DateField()
 
     @classmethod
+    def get_object(cls, unique_id: int) -> Optional[Paste]:
+        result = cls.objects.all().filter(uuid=unique_id)  # noqa
+        return result[0] if len(result) > 0 else None
+
+    @classmethod
     def get_paste_by_uuid_as_list(cls, unique_id: int) -> List[Paste]:
         return cls.objects.all().filter(uuid=unique_id)  # noqa
 
