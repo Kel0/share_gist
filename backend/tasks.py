@@ -20,6 +20,11 @@ def format_(arg):
     arg.run(f"black {PACKAGE}", echo=True)
 
 
+@invoke.task
+def start(arg, port=8000):
+    arg.run(f"cd {PACKAGE} && ./manage.py runserver {port}", echo=True, pty=True)
+
+
 @invoke.task(
     help={
         "style": "Check style with flake8, isort, and black",
