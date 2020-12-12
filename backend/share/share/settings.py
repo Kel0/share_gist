@@ -19,7 +19,7 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parent.parent
 API_TOKEN = config("API_TOKEN", default=None, cast=str)
 
-if API_TOKEN is None:
+if API_TOKEN is None:  # pragma: no cover
     raise RuntimeError(".env doesn't have API_TOKEN variable")
 
 API_TOKEN_HASHED = md5(API_TOKEN.encode("utf-8")).hexdigest()

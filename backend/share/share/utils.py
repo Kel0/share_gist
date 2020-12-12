@@ -7,9 +7,9 @@ from django.http import JsonResponse
 
 
 @dataclass
-class ApiResponse:
+class APIResponse:
     status: int
-    details: Union[List, Dict, str] = ""
+    details: Union[List, Dict, str] = "No details."
 
     @property
     def json(self):
@@ -43,11 +43,10 @@ def token_verify(func):
                     == settings.API_TOKEN_HASHED
                 ):
                     return func(obj, request)
-                return JsonResponse(
-                    {
-                        "status": HTTPStatus.BAD_REQUEST,
-                        "details": "Invalid api_token parameter.",
-                    }
-                )
+
+                return APIResponse(
+                    status=HTTPStatus.BAD_REQUEST,
+                    details="Invalid api_token parameter.",
+                ).json
 
     return wrapper
