@@ -12,6 +12,16 @@ class Lexer(models.Model):
     name = models.CharField(max_length=225)
 
     @classmethod
+    def get_object_by_id(cls, pk: int) -> Optional[Lexer]:
+        result = cls.objects.all().filter(pk=pk)  # noqa
+        return result[0] if len(result) > 0 else None
+
+    @classmethod
+    def get_object_by_name(cls, name: str) -> Optional[Lexer]:
+        result = cls.objects.all().filter(name=name)  # noqa
+        return result[0] if len(result) > 0 else None
+
+    @classmethod
     def get_lexers_as_list(cls) -> List[Lexer]:
         return list(cls.objects.all())  # noqa
 

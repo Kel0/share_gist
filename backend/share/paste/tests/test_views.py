@@ -24,6 +24,20 @@ class TestLexer(APITestSetup):
             "details": "Invalid lexer_name variable.",
         }
 
+    def test_update_lexer(self):
+        lexer = self._setup_lexer()
+        assert lexer["details"]["name"] == self.example_lexer["lexer_name"]
+
+        response = self.client.put(
+            self.lexers_url,
+            data={"lexer_id": lexer["details"]["id"], "lexer_name": "Python2.7"},
+            format="json",
+        )
+        assert response.json() == {
+            "status": 200,
+            "details": {"id": 1, "name": "Python2.7"},
+        }
+
     def test_get_lexers(self) -> None:
         self.test_post_lexer()
         response = self.client.get(self.lexers_url)
@@ -33,6 +47,15 @@ class TestLexer(APITestSetup):
             "status": 200,
             "details": [{"id": 1, "name": "Python"}],
         }
+
+    def test_delete_lexer(self):
+        self.test_get_lexers()
+        response = self.client.delete(
+            self.lexers_url, data={"lexer_id": 1}, format="json"
+        )
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.json() == {"status": 200, "details": True}
 
 
 class TestPaste(APITestSetup):

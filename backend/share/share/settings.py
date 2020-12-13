@@ -23,6 +23,7 @@ if API_TOKEN is None:  # pragma: no cover
     raise RuntimeError(".env doesn't have API_TOKEN variable")
 
 API_TOKEN_HASHED = md5(API_TOKEN.encode("utf-8")).hexdigest()
+print(API_TOKEN_HASHED)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
