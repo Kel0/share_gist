@@ -22,8 +22,11 @@ class APITestSetup(APITestCase):
 
         return super().setUp()
 
-    def _setup_lexer(self) -> None:
-        self.client.post(self.lexers_url, data=self.example_lexer, format="json")
+    def _setup_lexer(self) -> dict:
+        lexer = self.client.post(
+            self.lexers_url, data=self.example_lexer, format="json"
+        )
+        return lexer.json()
 
     def _setup_paste(self) -> dict:
         paste = self.client.post(

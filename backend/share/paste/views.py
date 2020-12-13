@@ -16,12 +16,19 @@ from .utils import convert_code_to_html
 
 
 class LexersView(APIView):
+    """
+    Get/Update/Create/Delete lexer instances
+    """
+
     def __init__(self):
         super().__init__()
         self.lexer_model = Lexer()
 
     @token_verify
     def get(self, request):
+        """
+        Get lexer instances
+        """
         serializer = LexerSerializer(self.lexer_model.get_lexers_as_list(), many=True)
         return APIResponse(
             status=HTTPStatus.OK,
@@ -30,6 +37,9 @@ class LexersView(APIView):
 
     @token_verify
     def post(self, request):
+        """
+        Create lexer instance
+        """
         lexer_name = json.loads(request.body.decode("utf-8")).get("lexer_name")
 
         if lexer_name is None:
@@ -46,8 +56,67 @@ class LexersView(APIView):
             status=HTTPStatus.BAD_REQUEST, details="Something went wrong."
         ).json
 
+    @token_verify
+    def put(self, request):
+        """
+        Update lexer instance
+        """
+        data = json.loads(request.body.decode("utf-8"))
+        lexer_id = data.get("lexer_id")
+        lexer_name = data.get("lexer_name")
+
+        if not lexer_name or not lexer_id:
+            return APIResponse(
+                status=HTTPStatus.BAD_REQUEST, details="Invalid parameters."
+            ).json
+
+        lexer = self.lexer_model.get_object_by_id(pk=lexer_id)
+        if lexer is None:
+            return APIResponse(
+                status=HTTPStatus.NOT_FOUND,
+                details="No lexer found under {lexer_id}".format(lexer_id=lexer_id),
+            ).json
+
+        lexer.name = lexer_name
+        lexer.save()
+        serializer = LexerSerializer(lexer)
+        return APIResponse(status=HTTPStatus.OK, details=serializer.data).json
+
+    @token_verify
+    def delete(self, request):
+        """
+        Delete lexer instance
+        """
+        data = json.loads(request.body.decode("utf-8"))
+        lexer = None
+        lexer_id = data.get("lexer_id")
+        lexer_name = data.get("lexer_name")
+
+        if not lexer_id and not lexer_name:
+            return APIResponse(
+                status=HTTPStatus.BAD_REQUEST, details="Invalid parameters."
+            ).json
+
+        if lexer_id:
+            lexer = self.lexer_model.get_object_by_id(pk=lexer_id)
+        elif lexer_name:
+            lexer = self.lexer_model.get_object_by_name(name=lexer_name)
+
+        if lexer is None:
+            return APIResponse(
+                status=HTTPStatus.NOT_FOUND,
+                details="No lexer under {lexer_id}".format(lexer_id=lexer_id),
+            ).json
+
+        lexer.delete()
+        return APIResponse(status=HTTPStatus.OK, details=True).json
+
 
 class PastesView(APIView):
+    """
+    Update/Create/Get/Delete paste instances
+    """
+
     def __init__(self):
         super().__init__()
         self.paste_model = Paste()
@@ -55,6 +124,9 @@ class PastesView(APIView):
 
     @token_verify
     def get(self, request):
+        """
+        Get paste instances
+        """
         uuid = request.GET.get("uuid")
         paste = self.paste_model.get_paste_by_uuid_as_list(unique_id=uuid)
 
@@ -74,12 +146,20 @@ class PastesView(APIView):
 
     @token_verify
     def post(self, request):
+        """
+        Create paste instance
+        """
         data = json.loads(request.body.decode("utf-8"))
-        lexer_id = data["lexer_id"]
-        name = data["name"]
-        content = data["code"]
+        lexer_id = data.get("lexer_id")
+        name = data.get("name")
+        content = data.get("code")
         unix = data.get("inspiration_date")
         inspiration_date = 0 if not unix else datetime.fromtimestamp(int(unix))
+
+        if not lexer_id or not name or not content:
+            return APIResponse(
+                status=HTTPStatus.BAD_REQUEST, details="Invalid parameters."
+            ).json
 
         paste = self.paste_model.create_paste(
             lex_id=lexer_id,
@@ -102,10 +182,18 @@ class PastesView(APIView):
 
     @token_verify
     def put(self, request):
+        """
+        Update paste instance
+        """
         data = json.loads(request.body.decode("utf-8"))
-        uuid = data["uuid"]
+        uuid = data.get("uuid")
         name = data.get("name")
         content = data.get("code")
+
+        if not uuid:
+            return APIResponse(
+                status=HTTPStatus.BAD_REQUEST, details="Invalid parameters."
+            ).json
 
         paste = self.paste_model.get_paste_by_uuid_as_list(unique_id=uuid)
 
@@ -129,6 +217,9 @@ class PastesView(APIView):
 
     @token_verify
     def delete(self, response):
+        """
+        Delete paste instance
+        """
         data = json.loads(response.body.decode("utf-8"))
         uuid = data.get("uuid")
 
