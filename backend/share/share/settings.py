@@ -18,6 +18,7 @@ from decouple import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 API_TOKEN = config("API_TOKEN", default=None, cast=str)
+print(API_TOKEN)
 
 if API_TOKEN is None:  # pragma: no cover
     raise RuntimeError(".env doesn't have API_TOKEN variable")
@@ -35,6 +36,11 @@ SECRET_KEY = "5+!5nprd_fv61i*7x$eh2wohen+8d*^$g()l(at#e$^su8=oe8"
 DEBUG = config("DEBUG", default=True, cast=bool)
 
 ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS_FOR_BASE_TOKEN_API = config(
+    "ALLOWED_HOSTS_FOR_BASE_TOKEN_API",
+    default=["127.0.0.1", "localhost"],
+    cast=lambda hosts: hosts.split(","),
+)
 
 # Application definition
 
@@ -48,6 +54,7 @@ INSTALLED_APPS = [
     "paste",
     "rest_framework",
     "corsheaders",
+    "api_tokens",
 ]
 
 MIDDLEWARE = [
