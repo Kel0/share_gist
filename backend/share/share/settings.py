@@ -57,6 +57,12 @@ INSTALLED_APPS = [
     "api_tokens",
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'share.middlewares.CsrfExemptSessionAuthentication',
+    ),
+}
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
